@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.TravelMemories.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/travel_icon_white</item>
+        <item name="postSplashScreenTheme">@style/Theme.TravelMemories.NoActionBar</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/travel_name_black</item>
+    </style>
+</resources>

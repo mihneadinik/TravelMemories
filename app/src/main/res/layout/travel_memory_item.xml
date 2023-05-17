@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="memory_data"
+            type="com.example.travelmemories.memories.Memory" />
+    </data>
+    <androidx.cardview.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view_memory_item"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginTop="@dimen/card_view_margins_vertical"
+        android:layout_marginBottom="@dimen/card_view_margins_vertical"
+        android:layout_marginStart="@dimen/card_view_margins_horizontal"
+        android:layout_marginEnd="@dimen/card_view_margins_horizontal"
+        app:cardCornerRadius="@dimen/card_view_corners"
+        app:cardBackgroundColor="@color/material_dynamic_neutral40"
+        >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            <TextView
+                android:id="@+id/travel_memory_place_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{memory_data.place_name}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/travel_memory_place_location"
+                />
+
+            <TextView
+                android:id="@+id/travel_memory_place_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{memory_data.place_location}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/travel_memory_place_name"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</layout>
