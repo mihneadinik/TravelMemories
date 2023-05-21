@@ -28,4 +28,14 @@
     <string name="notes_hint">Add your thoughts here</string>
     <string name="location">Location</string>
     <string name="location_hint">Enter location</string>
+
+    // Spinner
+    <string-array name="spinner_travel_types">
+        <item>Other</item>
+        <item>Business</item>
+        <item>Holiday</item>
+        <item>City break</item>
+        <item>Adventure</item>
+        <item>Organised trip</item>
+    </string-array>
 </resources>
