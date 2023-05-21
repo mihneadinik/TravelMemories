@@ -23,4 +23,9 @@
     <string name="add_button_text">Create travel memory</string>
     <string name="mood_text">Mood</string>
     <string name="type_of_travel_text">Type of travel</string>
+    <string name="place_name_hint">Enter place name</string>
+    <string name="notes">Notes</string>
+    <string name="notes_hint">Add your thoughts here</string>
+    <string name="location">Location</string>
+    <string name="location_hint">Enter location</string>
 </resources>
