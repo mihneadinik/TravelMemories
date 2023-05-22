@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelmemories.databinding.TravelMemoryItemBinding
 import com.example.travelmemories.ui.home.HomeFragment
@@ -36,7 +37,8 @@ class MemoryAdapter(private val memoryList: MutableLiveData<List<Memory>>) : Rec
             }
             binding.cardViewMemoryItem.setOnLongClickListener{
                 // long click opens edit dialog
-                Toast.makeText(binding.root.context, "Long", Toast.LENGTH_SHORT).show()
+                val action = HomeFragmentDirections.actionHomeFragmentToAddMemoryFragment(memory.id)
+                findNavController(binding.root).navigate(action)
                 true
             }
             binding.executePendingBindings()

@@ -25,6 +25,7 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.travelmemories.memories.MemoryDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,6 +36,7 @@ class AddMemoryFragment : Fragment() {
     private lateinit var binding: FragmentAddMemoryBinding
     private var coordinates: LatLng? = null
     private var travelType: String? = null
+    private val args: AddMemoryFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,10 +60,17 @@ class AddMemoryFragment : Fragment() {
             return@setLabelFormatter getMoodLevel(value)
         }
 
-        // save memory
-        setSaveMemory()
-
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // retrieve fields from current memory
+        if (args.memoryId != -1) {
+            updateMemorySettings()
+        } else {
+            setSaveMemory()
+        }
     }
 
     private fun updateTravelTime(calendar: Calendar) {
@@ -70,7 +79,73 @@ class AddMemoryFragment : Fragment() {
         binding.dateOfTravelInput.text = sdf.format(calendar.time)
     }
 
+    private fun updateMemorySettings() {
+        // change button text
+        binding.addMemoryButton.text = resources.getString(R.string.add_button_text_update)
+
+        // fetch data from db
+        val memoryDB = MemoryDatabase.getInstance(requireContext())
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val currMemory = memoryDB.memoryDao().getMemory(args.memoryId)
+                binding.placeNameInput.setText(currMemory.placeName)
+                binding.locationInput.setText(currMemory.placeLocation)
+                binding.dateOfTravelInput.text = currMemory.travelTime
+                binding.moodSlider.value = currMemory.moodLevel
+                binding.notesInput.setText(currMemory.memoryNotes)
+            }
+        }
+        setUpdateMemory()
+    }
+
+    private fun setUpdateMemory() {
+        // update memory in database
+        binding.addMemoryButton.setOnClickListener {
+            // get values from input fields
+            val placeName = binding.placeNameInput.text.toString()
+            val placeLocation = binding.locationInput.text.toString()
+            val travelTime = binding.dateOfTravelInput.text.toString()
+            val moodLevel = binding.moodSlider.value
+            val memoryNotes = binding.notesInput.text.toString()
+
+            // check if all fields are filled
+            if (placeName.isEmpty() || placeName == resources.getString(R.string.place_name_hint) ||
+                placeLocation.isEmpty() || placeLocation == resources.getString(R.string.location_hint) ||
+                travelTime.isEmpty() || travelTime == resources.getString(R.string.date_of_travel_input)
+            ) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            // update memory
+            val memoryDB = MemoryDatabase.getInstance(requireContext())
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    // retrieve memory
+                    val currMemory = memoryDB.memoryDao().getMemory(args.memoryId)
+
+                    // update fields
+                    currMemory.placeName = placeName
+                    currMemory.placeLocation = placeLocation
+                    currMemory.travelTime = travelTime
+                    currMemory.moodLevel = moodLevel
+                    currMemory.memoryNotes = memoryNotes
+                    currMemory.placeLongitude = coordinates?.longitude
+                    currMemory.placeLatitude = coordinates?.latitude
+
+                    // update memory in db
+                    memoryDB.memoryDao().updateMemory(currMemory)
+                }
+            }
+
+            // navigate back to home fragment
+            findNavController(binding.root).navigate(R.id.action_detailed_view_fragment_to_home_fragment)
+        }
+    }
+
     private fun setSaveMemory() {
+        // save memory to database
         binding.addMemoryButton.setOnClickListener {
             // get values from input fields
             val placeName = binding.placeNameInput.text.toString()
