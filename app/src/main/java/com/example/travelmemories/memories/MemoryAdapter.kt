@@ -3,24 +3,25 @@ package com.example.travelmemories.memories
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.travelmemories.databinding.TravelMemoryItemBinding
 import com.example.travelmemories.ui.home.HomeFragment
 import com.example.travelmemories.ui.home.HomeFragmentDirections
 
-class MemoryAdapter(private val memoryList: List<Memory>?) : RecyclerView.Adapter<MemoryAdapter.MemoryViewHolder>() {
+class MemoryAdapter(private val memoryList: MutableLiveData<List<Memory>>) : RecyclerView.Adapter<MemoryAdapter.MemoryViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoryViewHolder {
         val binding = TravelMemoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return MemoryViewHolder(binding)
     }
 
     override fun getItemCount(): Int {
-        return memoryList?.size ?: 0
+        return memoryList.value?.size ?: 0
     }
 
     override fun onBindViewHolder(holder: MemoryViewHolder, position: Int) {
-        memoryList?.get(position)?.let { holder.bind(it) }
+        memoryList.value?.get(position)?.let { holder.bind(it) }
     }
 
     class MemoryViewHolder(private val binding: TravelMemoryItemBinding) : RecyclerView.ViewHolder(binding.root) {

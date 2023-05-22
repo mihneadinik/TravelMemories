@@ -13,8 +13,10 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.travelmemories.R
 import com.example.travelmemories.databinding.FragmentAddMemoryBinding
+import com.example.travelmemories.memories.Memory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -23,12 +25,17 @@ import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import androidx.navigation.Navigation.findNavController
+import com.example.travelmemories.memories.MemoryDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class AddMemoryFragment : Fragment() {
     private lateinit var binding: FragmentAddMemoryBinding
-    var coordinates: LatLng? = null
-    var travelType: String? = null
+    private var coordinates: LatLng? = null
+    private var travelType: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,6 +59,9 @@ class AddMemoryFragment : Fragment() {
             return@setLabelFormatter getMoodLevel(value)
         }
 
+        // save memory
+        saveMemory()
+
         return binding.root
     }
 
@@ -59,6 +69,52 @@ class AddMemoryFragment : Fragment() {
         val myFormat = "dd/MM/yyyy"
         val sdf = SimpleDateFormat(myFormat, Locale.ENGLISH)
         binding.dateOfTravelInput.text = sdf.format(calendar.time)
+    }
+
+    private fun saveMemory() {
+        binding.addMemoryButton.setOnClickListener {
+            // get values from input fields
+            val placeName = binding.placeNameInput.text.toString()
+            val placeLocation = binding.locationInput.text.toString()
+            val travelTime = binding.dateOfTravelInput.text.toString()
+            val moodLevel = binding.moodSlider.value
+            val memoryNotes = binding.notesInput.text.toString()
+            Log.d("AddMemoryFragment", "saveMemory: $placeName; $placeLocation; $travelTime; $moodLevel; $memoryNotes")
+
+            // check if all fields are filled
+            if (placeName.isEmpty() || placeName == resources.getString(R.string.place_name_hint) ||
+                placeLocation.isEmpty() || placeLocation == resources.getString(R.string.location_hint) ||
+                travelTime.isEmpty() || travelTime == resources.getString(R.string.date_of_travel_input)
+            ) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            // create memory object
+            val memory = Memory(
+                placeName,
+                placeLocation,
+                coordinates?.latitude,
+                coordinates?.longitude,
+                travelType,
+                travelTime,
+                moodLevel,
+                memoryNotes,
+                null
+            )
+
+            // save memory to database
+            val memoryDB = MemoryDatabase.getInstance(requireContext())
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    memoryDB.memoryDao().insertMemory(memory)
+                }
+            }
+
+            // navigate back to home fragment
+            findNavController(binding.root).navigate(R.id.action_detailed_view_fragment_to_home_fragment)
+        }
     }
 
     private fun setDatePicker() {
