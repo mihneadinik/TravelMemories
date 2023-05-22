@@ -21,7 +21,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
-import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -60,7 +59,7 @@ class AddMemoryFragment : Fragment() {
         }
 
         // save memory
-        saveMemory()
+        setSaveMemory()
 
         return binding.root
     }
@@ -71,7 +70,7 @@ class AddMemoryFragment : Fragment() {
         binding.dateOfTravelInput.text = sdf.format(calendar.time)
     }
 
-    private fun saveMemory() {
+    private fun setSaveMemory() {
         binding.addMemoryButton.setOnClickListener {
             // get values from input fields
             val placeName = binding.placeNameInput.text.toString()
@@ -79,7 +78,6 @@ class AddMemoryFragment : Fragment() {
             val travelTime = binding.dateOfTravelInput.text.toString()
             val moodLevel = binding.moodSlider.value
             val memoryNotes = binding.notesInput.text.toString()
-            Log.d("AddMemoryFragment", "saveMemory: $placeName; $placeLocation; $travelTime; $moodLevel; $memoryNotes")
 
             // check if all fields are filled
             if (placeName.isEmpty() || placeName == resources.getString(R.string.place_name_hint) ||
