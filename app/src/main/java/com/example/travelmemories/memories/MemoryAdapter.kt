@@ -3,10 +3,12 @@ package com.example.travelmemories.memories
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.example.travelmemories.R
 import com.example.travelmemories.databinding.TravelMemoryItemBinding
 import com.example.travelmemories.ui.home.HomeFragment
 import com.example.travelmemories.ui.home.HomeFragmentDirections
@@ -28,6 +30,13 @@ class MemoryAdapter(private val memoryList: MutableLiveData<List<Memory>>) : Rec
     class MemoryViewHolder(private val binding: TravelMemoryItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(memory: Memory) {
             binding.memoryData = memory
+
+            // set picture
+            if (memory.memoryImage != null) {
+                binding.travelMemoryImage.setImageURI(memory.memoryImage!!.toUri())
+            } else {
+                binding.travelMemoryImage.setImageResource(R.drawable.sad_face)
+            }
 
             // set click listeners
             binding.cardViewMemoryItem.setOnClickListener {

@@ -18,4 +18,7 @@ interface MemoryDAO {
 
     @Update
     fun updateMemory(memory: Memory)
+
+    @Query("DELETE FROM memories_table")
+    fun deleteAllMemories()
 }
