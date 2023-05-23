@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.travelmemories.R
+import com.example.travelmemories.utils.Utils
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
@@ -28,6 +29,7 @@ class MapFragment(private val latitude: Double, private val longitude: Double) :
                     12f
                 )
             )
+            googleMap.mapType = Utils.mapViewType
             googleMap.addMarker(
                 MarkerOptions()
                     .position(LatLng(latitude, longitude))

@@ -1,7 +1,10 @@
 package com.example.travelmemories.utils
 
+import com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL
+
 class Utils {
     companion object {
+        var mapViewType: Int = MAP_TYPE_NORMAL
         fun getMoodLevel(value: Float): String {
             if (value <= 0.2f) {
                 return "Very unhappy"

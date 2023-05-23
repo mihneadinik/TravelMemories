@@ -31,6 +31,8 @@
     <string name="send_email_button">Trimite email</string>
     <string name="email_hint">Introdu feedback-ul aici</string>
     <string name="contact_us">Spune-ne ce crezi!</string>
+    <string name="darkmode_text">Schimba modul intunecat</string>
+    <string name="map_type_text">Schimba vizualizarea hartii</string>
 
     // Spinner
     <string-array name="spinner_travel_types">
