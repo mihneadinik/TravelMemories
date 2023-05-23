@@ -27,6 +27,7 @@ import java.util.Calendar
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.travelmemories.memories.MemoryDatabase
+import com.example.travelmemories.utils.Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -57,7 +58,7 @@ class AddMemoryFragment : Fragment() {
 
         // add labels to slider
         binding.moodSlider.setLabelFormatter { value: Float ->
-            return@setLabelFormatter getMoodLevel(value)
+            return@setLabelFormatter Utils.getMoodLevel(value)
         }
 
         return binding.root
@@ -273,21 +274,5 @@ class AddMemoryFragment : Fragment() {
             binding.locationInput.requestFocus()
             binding.locationInput.setOnClickListener(null)
         }
-    }
-
-    fun getMoodLevel(value: Float): String {
-        if (value <= 0.2f) {
-            return "Very unhappy"
-        }
-        if (value <= 0.4f) {
-            return "Unhappy"
-        }
-        if (value <= 0.6f) {
-            return "Neutral"
-        }
-        if (value <= 0.8f) {
-            return "Happy"
-        }
-        return "Very happy"
     }
 }

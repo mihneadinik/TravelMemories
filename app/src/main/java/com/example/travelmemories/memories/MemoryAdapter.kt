@@ -32,7 +32,7 @@ class MemoryAdapter(private val memoryList: MutableLiveData<List<Memory>>) : Rec
             // set click listeners
             binding.cardViewMemoryItem.setOnClickListener {
                 // short click show more info
-                val action = HomeFragmentDirections.actionHomeFragmentToDetailedViewFragment()
+                val action = HomeFragmentDirections.actionHomeFragmentToDetailedViewFragment(memory.id)
                 findNavController(binding.root).navigate(action)
             }
             binding.cardViewMemoryItem.setOnLongClickListener{
