@@ -12,6 +12,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.travelmemories.R
@@ -37,6 +38,7 @@ class AddMemoryFragment : Fragment() {
     private lateinit var binding: FragmentAddMemoryBinding
     private var coordinates: LatLng? = null
     private var travelType: String? = null
+    private var imageURI: String? = null
     private val args: AddMemoryFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -59,6 +61,15 @@ class AddMemoryFragment : Fragment() {
         // add labels to slider
         binding.moodSlider.setLabelFormatter { value: Float ->
             return@setLabelFormatter Utils.getMoodLevel(value)
+        }
+
+        // add picture button
+        binding.addPictureButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.type = "image/*"
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivityForResult(intent, 3)
         }
 
         return binding.root
@@ -94,6 +105,11 @@ class AddMemoryFragment : Fragment() {
                 binding.dateOfTravelInput.text = currMemory.travelTime
                 binding.moodSlider.value = currMemory.moodLevel
                 binding.notesInput.setText(currMemory.memoryNotes)
+                binding.typeOfTravelSpinner.setSelection(
+                    (binding.typeOfTravelSpinner.adapter as ArrayAdapter<String?>).getPosition(
+                        currMemory.travelType
+                    )
+                )
             }
         }
         setUpdateMemory()
@@ -130,10 +146,13 @@ class AddMemoryFragment : Fragment() {
                     currMemory.placeName = placeName
                     currMemory.placeLocation = placeLocation
                     currMemory.travelTime = travelTime
+                    currMemory.travelType = travelType
                     currMemory.moodLevel = moodLevel
                     currMemory.memoryNotes = memoryNotes
                     currMemory.placeLongitude = coordinates?.longitude
                     currMemory.placeLatitude = coordinates?.latitude
+                    if (imageURI != null)
+                        currMemory.memoryImage = imageURI
 
                     // update memory in db
                     memoryDB.memoryDao().updateMemory(currMemory)
@@ -175,7 +194,7 @@ class AddMemoryFragment : Fragment() {
                 travelTime,
                 moodLevel,
                 memoryNotes,
-                null
+                imageURI
             )
 
             // save memory to database
@@ -273,6 +292,17 @@ class AddMemoryFragment : Fragment() {
             binding.locationInput.isFocusableInTouchMode = true
             binding.locationInput.requestFocus()
             binding.locationInput.setOnClickListener(null)
+        }
+
+        // received image from gallery
+        if (requestCode == 3 && resultCode == RESULT_OK) {
+            if (data != null) {
+                context?.contentResolver?.takePersistableUriPermission(
+                    data.data!!,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                imageURI = data.data.toString()
+            }
         }
     }
 }

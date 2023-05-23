@@ -1,10 +1,16 @@
 package com.example.travelmemories.ui.detailedview
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -38,25 +44,32 @@ class DetailedViewFragment : Fragment() {
         // retrieve current memory
         val memoryDB = MemoryDatabase.getInstance(requireContext())
         lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
-                val currMemory = memoryDB.memoryDao().getMemory(args.memoryId)
-                binding.memory = currMemory
-                binding.moodValue.text = Utils.getMoodLevel(currMemory.moodLevel)
+            val currMemory = withContext(Dispatchers.IO) {
+                memoryDB.memoryDao().getMemory(args.memoryId)
+            }
+            binding.memory = currMemory
+            binding.moodValue.text = Utils.getMoodLevel(currMemory.moodLevel)
 
-                // set notes text
-                if (currMemory.memoryNotes == null || currMemory.memoryNotes == "") {
-                    binding.notesValue.text = resources.getString(R.string.notes_empty_message)
-                } else {
-                    binding.notesValue.text = currMemory.memoryNotes
-                }
+            // set notes text
+            if (currMemory.memoryNotes == null || currMemory.memoryNotes == "") {
+                binding.notesValue.text = resources.getString(R.string.notes_empty_message)
+            } else {
+                binding.notesValue.text = currMemory.memoryNotes
+            }
 
-                // show map
-                if (currMemory.placeLatitude != null && currMemory.placeLongitude != null) {
-                    val mapFragment = MapFragment(currMemory.placeLatitude!!, currMemory.placeLongitude!!)
-                    childFragmentManager.beginTransaction().replace(R.id.map_container, mapFragment).commit()
-                } else {
-                    binding.mapContainer.visibility = View.GONE
-                }
+            // show map
+            if (currMemory.placeLatitude != null && currMemory.placeLongitude != null) {
+                val mapFragment = MapFragment(currMemory.placeLatitude!!, currMemory.placeLongitude!!)
+                childFragmentManager.beginTransaction().replace(R.id.map_container, mapFragment).commit()
+            } else {
+                binding.mapContainer.visibility = View.GONE
+            }
+
+            // set picture
+            if (currMemory.memoryImage != null) {
+                binding.memoryImage.setImageURI(currMemory.memoryImage!!.toUri())
+            } else {
+                binding.memoryImage.setImageResource(R.drawable.sad_face)
             }
         }
     }
