@@ -12,23 +12,34 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.travelmemories.R
 import com.example.travelmemories.databinding.FragmentAddMemoryBinding
+import com.example.travelmemories.memories.Memory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
-import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.navArgs
+import com.example.travelmemories.memories.MemoryDatabase
+import com.example.travelmemories.utils.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class AddMemoryFragment : Fragment() {
     private lateinit var binding: FragmentAddMemoryBinding
-    var coordinates: LatLng? = null
-    var travelType: String? = null
+    private var coordinates: LatLng? = null
+    private var travelType: String? = null
+    private var imageURI: String? = null
+    private val args: AddMemoryFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,16 +60,154 @@ class AddMemoryFragment : Fragment() {
 
         // add labels to slider
         binding.moodSlider.setLabelFormatter { value: Float ->
-            return@setLabelFormatter getMoodLevel(value)
+            return@setLabelFormatter Utils.getMoodLevel(value)
+        }
+
+        // add picture button
+        binding.addPictureButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.type = "image/*"
+            intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivityForResult(intent, 3)
         }
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // retrieve fields from current memory
+        if (args.memoryId != -1) {
+            updateMemorySettings()
+        } else {
+            setSaveMemory()
+        }
     }
 
     private fun updateTravelTime(calendar: Calendar) {
         val myFormat = "dd/MM/yyyy"
         val sdf = SimpleDateFormat(myFormat, Locale.ENGLISH)
         binding.dateOfTravelInput.text = sdf.format(calendar.time)
+    }
+
+    private fun updateMemorySettings() {
+        // change button text
+        binding.addMemoryButton.text = resources.getString(R.string.add_button_text_update)
+
+        // fetch data from db
+        val memoryDB = MemoryDatabase.getInstance(requireContext())
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val currMemory = memoryDB.memoryDao().getMemory(args.memoryId)
+                binding.placeNameInput.setText(currMemory.placeName)
+                binding.locationInput.setText(currMemory.placeLocation)
+                binding.dateOfTravelInput.text = currMemory.travelTime
+                binding.moodSlider.value = currMemory.moodLevel
+                binding.notesInput.setText(currMemory.memoryNotes)
+                binding.typeOfTravelSpinner.setSelection(
+                    (binding.typeOfTravelSpinner.adapter as ArrayAdapter<String?>).getPosition(
+                        currMemory.travelType
+                    )
+                )
+            }
+        }
+        setUpdateMemory()
+    }
+
+    private fun setUpdateMemory() {
+        // update memory in database
+        binding.addMemoryButton.setOnClickListener {
+            // get values from input fields
+            val placeName = binding.placeNameInput.text.toString()
+            val placeLocation = binding.locationInput.text.toString()
+            val travelTime = binding.dateOfTravelInput.text.toString()
+            val moodLevel = binding.moodSlider.value
+            val memoryNotes = binding.notesInput.text.toString()
+
+            // check if all fields are filled
+            if (placeName.isEmpty() || placeName == resources.getString(R.string.place_name_hint) ||
+                placeLocation.isEmpty() || placeLocation == resources.getString(R.string.location_hint) ||
+                travelTime.isEmpty() || travelTime == resources.getString(R.string.date_of_travel_input)
+            ) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            // update memory
+            val memoryDB = MemoryDatabase.getInstance(requireContext())
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    // retrieve memory
+                    val currMemory = memoryDB.memoryDao().getMemory(args.memoryId)
+
+                    // update fields
+                    currMemory.placeName = placeName
+                    currMemory.placeLocation = placeLocation
+                    currMemory.travelTime = travelTime
+                    currMemory.travelType = travelType
+                    currMemory.moodLevel = moodLevel
+                    currMemory.memoryNotes = memoryNotes
+                    currMemory.placeLongitude = coordinates?.longitude
+                    currMemory.placeLatitude = coordinates?.latitude
+                    if (imageURI != null)
+                        currMemory.memoryImage = imageURI
+
+                    // update memory in db
+                    memoryDB.memoryDao().updateMemory(currMemory)
+                }
+            }
+
+            // navigate back to home fragment
+            findNavController(binding.root).navigate(R.id.action_detailed_view_fragment_to_home_fragment)
+        }
+    }
+
+    private fun setSaveMemory() {
+        // save memory to database
+        binding.addMemoryButton.setOnClickListener {
+            // get values from input fields
+            val placeName = binding.placeNameInput.text.toString()
+            val placeLocation = binding.locationInput.text.toString()
+            val travelTime = binding.dateOfTravelInput.text.toString()
+            val moodLevel = binding.moodSlider.value
+            val memoryNotes = binding.notesInput.text.toString()
+
+            // check if all fields are filled
+            if (placeName.isEmpty() || placeName == resources.getString(R.string.place_name_hint) ||
+                placeLocation.isEmpty() || placeLocation == resources.getString(R.string.location_hint) ||
+                travelTime.isEmpty() || travelTime == resources.getString(R.string.date_of_travel_input)
+            ) {
+                Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            // create memory object
+            val memory = Memory(
+                placeName,
+                placeLocation,
+                coordinates?.latitude,
+                coordinates?.longitude,
+                travelType,
+                travelTime,
+                moodLevel,
+                memoryNotes,
+                imageURI
+            )
+
+            // save memory to database
+            val memoryDB = MemoryDatabase.getInstance(requireContext())
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    memoryDB.memoryDao().insertMemory(memory)
+                }
+            }
+
+            // navigate back to home fragment
+            findNavController(binding.root).navigate(R.id.action_detailed_view_fragment_to_home_fragment)
+        }
     }
 
     private fun setDatePicker() {
@@ -144,21 +293,16 @@ class AddMemoryFragment : Fragment() {
             binding.locationInput.requestFocus()
             binding.locationInput.setOnClickListener(null)
         }
-    }
 
-    fun getMoodLevel(value: Float): String {
-        if (value <= 0.2f) {
-            return "Very unhappy"
+        // received image from gallery
+        if (requestCode == 3 && resultCode == RESULT_OK) {
+            if (data != null) {
+                context?.contentResolver?.takePersistableUriPermission(
+                    data.data!!,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+                imageURI = data.data.toString()
+            }
         }
-        if (value <= 0.4f) {
-            return "Unhappy"
-        }
-        if (value <= 0.6f) {
-            return "Neutral"
-        }
-        if (value <= 0.8f) {
-            return "Happy"
-        }
-        return "Very happy"
     }
 }

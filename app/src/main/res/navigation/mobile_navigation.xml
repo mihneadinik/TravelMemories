@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_home_fragment_to_detailed_view_fragment"
             app:destination="@id/nav_detailedview"/>
+        <action
+            android:id="@+id/action_home_fragment_to_add_memory_fragment"
+            app:destination="@id/nav_addmemory"/>
     </fragment>
     <fragment
         android:id="@+id/nav_aboutus"
@@ -43,10 +46,24 @@
         android:id="@+id/nav_detailedview"
         android:name="com.example.travelmemories.ui.detailedview.DetailedViewFragment"
         android:label="fragment_detailed_view"
-        tools:layout="@layout/fragment_detailed_view" />
+        tools:layout="@layout/fragment_detailed_view">
+        <argument
+            android:name="memory_id"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
     <fragment
         android:id="@+id/nav_addmemory"
         android:name="com.example.travelmemories.ui.addmemory.AddMemoryFragment"
-        android:label="AddMemoryFragment" />
+        android:label="AddMemoryFragment"
+        tools:layout="@layout/fragment_add_memory">
+        <argument
+            android:name="memory_id"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_detailed_view_fragment_to_home_fragment"
+            app:destination="@id/nav_home"/>
+    </fragment>
 
 </navigation>

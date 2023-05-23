@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amintiri din copilarie</string>
+
+    <string name="navigation_drawer_open">Deschide navigarea</string>
+    <string name="navigation_drawer_close">Inchide navigarea</string>
+    <string name="action_settings">Setari</string>
+
+    <string name="menu_home">Acasa</string>
+    <string name="menu_about_us">Despre noi</string>
+    <string name="menu_contact_us">Contact</string>
+    <string name="menu_share">Distribuie</string>
+    <string name="menu_settings">Setari</string>
+    <string name="menu_logout">Iesire</string>
+    <string name="home_text">Amintirile mele</string>
+
+    <string name="place_name"> Numele locatiei</string>
+    <string name="date_of_travel">Data</string>
+    <string name="date_of_travel_input">Apasa pentru data</string>
+    <string name="add_button_text_create">Creeaza o noua amintire</string>
+    <string name="add_button_text_update"> Modifica o amintire</string>
+    <string name="add_picture_button_text">Adauga imagine</string>
+    <string name="mood_text">Stare</string>
+    <string name="type_of_travel_text">Tipul calatoriei</string>
+    <string name="place_name_hint">Scrie numele locatiei</string>
+    <string name="notes">Notite</string>
+    <string name="notes_hint">Adauga-ti gandurile aici</string>
+    <string name="notes_empty_message">Nu au fost adaugate notite</string>
+    <string name="location">Locatie</string>
+    <string name="location_hint">Adauga locatie</string>
+    <string name="send_email_button">Trimite email</string>
+    <string name="email_hint">Introdu feedback-ul aici</string>
+    <string name="contact_us">Spune-ne ce crezi!</string>
+    <string name="darkmode_text">Schimba modul intunecat</string>
+    <string name="map_type_text">Schimba vizualizarea hartii</string>
+
+    // Spinner
+    <string-array name="spinner_travel_types">
+        <item>Alta</item>
+        <item>Business</item>
+        <item>Vacanta</item>
+        <item>City break</item>
+        <item>Aventura</item>
+        <item>Trip organizat</item>
+    </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+
+
+
+</resources>
